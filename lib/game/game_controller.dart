@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../audio/audio_service.dart';
+import '../settings/app_settings.dart';
 import 'choice_builder.dart';
 import 'color_utils.dart';
 import 'difficulty.dart';
@@ -113,11 +115,13 @@ class GameController extends ChangeNotifier {
       lastGain = 100 + (level - 1) * 10 + skipBonus + streakBonus;
       score += lastGain;
       HapticFeedback.lightImpact();
+      _sfx(AudioService.instance.playCorrect);
     } else {
       streak = 0;
       lastGain = 0;
       lives--;
       HapticFeedback.heavyImpact();
+      _sfx(AudioService.instance.playWrong);
     }
 
     phase = GamePhase.reveal;
@@ -141,6 +145,7 @@ class GameController extends ChangeNotifier {
     if (level > bestLevel) bestLevel = level;
     phase = GamePhase.over;
     _safeNotify();
+    _sfx(AudioService.instance.playGameOver);
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_bestScoreKey, bestScore);
@@ -149,6 +154,11 @@ class GameController extends ChangeNotifier {
   }
 
   Rgb get target => round.target;
+
+  /// Ses efektini yalnızca ses açıkken çal.
+  void _sfx(Future<void> Function() play) {
+    if (AppSettings.instance.musicOn) play();
+  }
 
   void _cancelTimers() {
     _viewTimer?.cancel();

@@ -11,6 +11,10 @@ class Hud extends StatelessWidget {
     required this.score,
     required this.color,
     required this.onClose,
+    required this.closeTooltip,
+    required this.levelLabel,
+    required this.musicOn,
+    required this.onToggleMusic,
   });
 
   final int level;
@@ -18,6 +22,10 @@ class Hud extends StatelessWidget {
   final int score;
   final Color color;
   final VoidCallback onClose;
+  final String closeTooltip;
+  final String levelLabel;
+  final bool musicOn;
+  final VoidCallback onToggleMusic;
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +36,10 @@ class Hud extends StatelessWidget {
           IconButton(
             onPressed: onClose,
             icon: Icon(Icons.close_rounded, color: color),
-            tooltip: 'Çık',
+            tooltip: closeTooltip,
           ),
           Text(
-            'Seviye $level',
+            levelLabel,
             style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 16),
           ),
           const Spacer(),
@@ -44,7 +52,15 @@ class Hud extends StatelessWidget {
                 size: 22,
               ),
             ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 4),
+          IconButton(
+            onPressed: onToggleMusic,
+            icon: Icon(
+              musicOn ? Icons.music_note_rounded : Icons.music_off_rounded,
+              color: color,
+              size: 22,
+            ),
+          ),
           Text(
             '$score',
             style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 18),

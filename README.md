@@ -26,6 +26,11 @@ flutter run
 ```
 `flutter create .` mevcut `lib/` ve `pubspec.yaml` dosyalarına dokunmaz, yalnızca `android/`, `ios/` gibi platform klasörlerini ekler.
 
+## Dil ve müzik
+- Oyun **İngilizce** açılır. Ana menüde sağ üstten EN / TR seçilir, tercih saklanır.
+- Müzik ve ses efektleri `tools/generate_audio.py` ile sıfırdan sentezlenmiş özgün seslerdir, telif / lisans sorunu yoktur. Yeniden üretmek için: `python tools/generate_audio.py` (numpy + scipy).
+- Müzik "Play" tuşuyla başlar (tarayıcılar ses için dokunuş ister). Müzik tuşu hem müziği hem efektleri kapatır.
+
 ## Testler
 ```bash
 flutter test
@@ -35,6 +40,9 @@ flutter test
 ```
 lib/main.dart                     uygulama girişi
 lib/theme.dart                    renkler ve tema
+lib/l10n/app_strings.dart         EN / TR metinler
+lib/settings/app_settings.dart    dil + müzik ayarı (kayıtlı)
+lib/audio/audio_service.dart      müzik ve ses efektleri
 lib/game/color_utils.dart         sRGB <-> CIELAB, ΔE
 lib/game/difficulty.dart          seviye -> kart sayısı + ΔE
 lib/game/choice_builder.dart      hedef renk ve yakın tuzak kartlar
@@ -43,5 +51,7 @@ lib/screens/home_screen.dart      ana menü
 lib/screens/game_screen.dart      gösterim / seçim / oyun sonu ekranları
 lib/widgets/hud.dart              üst bar
 assets/logo/                      logo (SVG + PNG) ve uygulama ikonu
+assets/audio/                     müzik ve ses efektleri (WAV)
+tools/generate_audio.py           sesleri üreten betik
 push.bat                          GitHub'a gönderir
 ```

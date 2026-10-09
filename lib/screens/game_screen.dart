@@ -4,10 +4,27 @@ import 'package:flutter/material.dart';
 
 import '../game/color_utils.dart';
 import '../game/game_controller.dart';
+import '../settings/app_settings.dart';
 import '../theme.dart';
 import '../widgets/hud.dart';
 
 const double _lumaThreshold = 0.179;
+
+Widget _buildHud(BuildContext context, GameController game, Color color, VoidCallback onClose) {
+  final settings = SettingsScope.of(context);
+  final t = settings.t;
+  return Hud(
+    level: game.level,
+    lives: game.lives,
+    score: game.score,
+    color: color,
+    onClose: onClose,
+    closeTooltip: t.exit,
+    levelLabel: t.level(game.level),
+    musicOn: settings.musicOn,
+    onToggleMusic: () => settings.setMusic(!settings.musicOn),
+  );
+}
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -72,6 +89,7 @@ class _ShowView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = SettingsScope.of(context).t;
     final target = game.target;
     final fg = target.luminance > _lumaThreshold ? AppColors.bg : Colors.white;
     final seconds = (game.remainingMs / 1000).ceil();
@@ -79,20 +97,14 @@ class _ShowView extends StatelessWidget {
 
     return Column(
       children: [
-        Hud(
-          level: game.level,
-          lives: game.lives,
-          score: game.score,
-          color: fg,
-          onClose: onClose,
-        ),
+        _buildHud(context, game, fg, onClose),
         Expanded(
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Bu rengi aklında tut',
+                  t.rememberColor,
                   style: TextStyle(color: fg, fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 28),
@@ -121,7 +133,7 @@ class _ShowView extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Hazırsan geç: +$bonus bonus',
+                  t.skipBonus(bonus),
                   style: TextStyle(color: fg.withAlpha(200), fontSize: 14),
                 ),
               ],
@@ -140,8 +152,8 @@ class _ShowView extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(29)),
               ),
               onPressed: game.skipView,
-              child: const Text(
-                'Hazırım',
+              child: Text(
+                t.ready,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               ),
             ),
@@ -162,29 +174,24 @@ class _ChooseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = SettingsScope.of(context).t;
     final revealing = game.phase == GamePhase.reveal;
 
     String headline;
     Color headlineColor = Colors.white;
     if (!revealing) {
-      headline = 'Hangisiydi?';
+      headline = t.whichOne;
     } else if (game.lastCorrect) {
-      headline = 'Doğru!  +${game.lastGain}';
+      headline = t.correct(game.lastGain);
       headlineColor = AppColors.good;
     } else {
-      headline = 'Yanlış! Doğru kart işaretlendi';
+      headline = t.wrong;
       headlineColor = AppColors.bad;
     }
 
     return Column(
       children: [
-        Hud(
-          level: game.level,
-          lives: game.lives,
-          score: game.score,
-          color: Colors.white,
-          onClose: onClose,
-        ),
+        _buildHud(context, game, Colors.white, onClose),
         Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 4),
           child: Text(
@@ -193,7 +200,7 @@ class _ChooseView extends StatelessWidget {
           ),
         ),
         Text(
-          '${game.difficulty.cardCount} kart',
+          t.cards(game.difficulty.cardCount),
           style: const TextStyle(color: AppColors.textDim, fontSize: 13),
         ),
         Expanded(
@@ -307,14 +314,15 @@ class _OverView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = SettingsScope.of(context).t;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Oyun bitti',
+            Text(
+              t.gameOver,
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 24),
@@ -326,16 +334,16 @@ class _OverView extends StatelessWidget {
                 color: AppColors.accent,
               ),
             ),
-            const Text('puan', style: TextStyle(color: AppColors.textDim, fontSize: 16)),
+            Text(t.points, style: TextStyle(color: AppColors.textDim, fontSize: 16)),
             const SizedBox(height: 16),
             Text(
-              'Ulaşılan seviye: ${game.level}',
+              t.levelReached(game.level),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             if (game.isNewBest)
-              const Text(
-                'Yeni rekor!',
+              Text(
+                t.newRecord,
                 style: TextStyle(
                   color: AppColors.good,
                   fontSize: 18,
@@ -344,7 +352,7 @@ class _OverView extends StatelessWidget {
               )
             else
               Text(
-                'En yüksek skor: ${game.bestScore}',
+                t.bestScore(game.bestScore),
                 style: const TextStyle(color: AppColors.textDim, fontSize: 16),
               ),
             const SizedBox(height: 40),
@@ -358,8 +366,8 @@ class _OverView extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                 ),
                 onPressed: game.start,
-                child: const Text(
-                  'Tekrar oyna',
+                child: Text(
+                  t.playAgain,
                   style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -367,7 +375,7 @@ class _OverView extends StatelessWidget {
             const SizedBox(height: 12),
             TextButton(
               onPressed: onClose,
-              child: const Text('Ana menü', style: TextStyle(fontSize: 16)),
+              child: Text(t.mainMenu, style: const TextStyle(fontSize: 16)),
             ),
           ],
         ),
