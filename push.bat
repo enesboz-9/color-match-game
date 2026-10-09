@@ -43,14 +43,28 @@ if not exist ".git" (
   git remote get-url origin >nul 2>nul || git remote add origin %REPO%
 )
 
+REM CRLF uyarilarini kapat
+git config core.autocrlf false
+git config core.safecrlf false
+
 git add -A
 git status --short
 
-set MSG=Color Match: ilk surum
+set MSG=Color Match: guncelleme
 if not "%~1"=="" set MSG=%*
 
 git commit -m "%MSG%"
 if errorlevel 1 echo [BILGI] Yeni degisiklik yok ya da commit atlandi.
+
+REM Push oncesi baglanti kontrolu: ag yoksa net bir mesaj ver
+git ls-remote --heads origin >nul 2>nul
+if errorlevel 1 (
+  echo.
+  echo [HATA] github.com adresine ulasilamadi. Internet, DNS, VPN veya proxy ayarlarini kontrol edin.
+  echo Degisiklikler yerelde commit edildi, kaybolmadi. Baglanti duzelince bu dosyayi tekrar calistirin.
+  pause
+  exit /b 1
+)
 
 git push -u origin %BRANCH%
 if errorlevel 1 (
