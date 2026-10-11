@@ -30,11 +30,27 @@ android {
         versionName = flutter.versionName
     }
 
+    // Codemagic keystore'u ortam değişkenleriyle verir (CM_KEYSTORE_PATH vb.).
+    // Yerelde bu değişkenler yoksa debug anahtarına düşer.
+    val cmKeystorePath: String? = System.getenv("CM_KEYSTORE_PATH")
+
+    signingConfigs {
+        if (cmKeystorePath != null) {
+            create("release") {
+                storeFile = file(cmKeystorePath)
+                storePassword = System.getenv("CM_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("CM_KEY_ALIAS")
+                keyPassword = System.getenv("CM_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (cmKeystorePath != null)
+                signingConfigs.getByName("release")
+            else
+                signingConfigs.getByName("debug")
         }
     }
 }

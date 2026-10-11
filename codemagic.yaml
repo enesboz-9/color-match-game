@@ -1,0 +1,51 @@
+workflows:
+  android-release:
+    name: Android Release
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      java: 17
+      android_signing:
+        - color_match_keystore   # Codemagic > Code signing identities'te bu isimle yükle
+      groups:
+        - google_play            # (opsiyonel) GCLOUD_SERVICE_ACCOUNT_CREDENTIALS burada
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Paketleri al
+        script: flutter pub get
+      - name: Analiz
+        script: flutter analyze
+        ignore_failure: true
+      - name: Test
+        script: flutter test
+        ignore_failure: true
+      - name: AAB derle
+        script: |
+          flutter build appbundle --release \
+            --build-number=$(($BUILD_NUMBER + 0))
+      - name: APK derle (elle test için)
+        script: |
+          flutter build apk --release \
+            --build-number=$(($BUILD_NUMBER + 0))
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/*.apk
+    publishing:
+      email:
+        recipients:
+          - enesboz201@gmail.com
+        notify:
+          success: true
+          failure: true
+      # Google Play hazır olunca aşağıdaki bloğun yorumunu kaldır:
+      # google_play:
+      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      #   track: internal
+      #   submit_to_google_play: false
