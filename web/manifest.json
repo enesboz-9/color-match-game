@@ -1,11 +1,11 @@
 {
-    "name": "color_match_game",
-    "short_name": "color_match_game",
+    "name": "Color Match",
+    "short_name": "Color Match",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#12141C",
+    "theme_color": "#12141C",
+    "description": "Rengi aklında tut, en yakın kartlar arasından aynısını bul.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

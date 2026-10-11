@@ -55,3 +55,13 @@ assets/audio/                     müzik ve ses efektleri (WAV)
 tools/generate_audio.py           sesleri üreten betik
 push.bat                          GitHub'a gönderir
 ```
+
+## Web (GitHub Pages)
+`main` dalına her push'ta `.github/workflows/deploy.yml` oyunu otomatik derleyip yayınlar.
+Tek seferlik ayar: GitHub'da **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+Yayın adresi: `https://<kullanıcı>.github.io/<repo-adı>/`
+
+Yerelde denemek için:
+```bash
+flutter build web --release --base-href "/color-match-game/"
+```
