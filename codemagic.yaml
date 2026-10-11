@@ -49,3 +49,50 @@ workflows:
       #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
       #   track: internal
       #   submit_to_google_play: false
+
+  ios-release:
+    name: iOS Release
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    integrations:
+      app_store_connect: codemagic   # Codemagic > Team integrations > App Store Connect'te bu isimle ekle
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.bnovative.colorMatchGame
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Paketleri al
+        script: flutter pub get
+      - name: CocoaPods
+        script: |
+          find . -name "Podfile" -execdir pod install \;
+      - name: Imzalama profillerini ayarla
+        script: xcode-project use-profiles
+      - name: IPA derle
+        script: |
+          flutter build ipa --release \
+            --build-number=$(($BUILD_NUMBER + 0)) \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - enesboz201@gmail.com
+        notify:
+          success: true
+          failure: true
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
