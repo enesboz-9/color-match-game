@@ -60,9 +60,10 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.bnovative.colorMatchGame
+      groups:
+        - ios_signing          # içinde CERTIFICATE_PRIVATE_KEY (Secure işaretli) olacak
+      vars:
+        BUNDLE_ID: "com.bnovative.colorMatchGame"
     triggering:
       events:
         - push
@@ -76,6 +77,15 @@ workflows:
       - name: CocoaPods
         script: |
           find . -name "Podfile" -execdir pod install \;
+      - name: Keychain hazirla
+        script: keychain initialize
+      - name: Sertifika ve profili Apple'dan al/olustur
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Sertifikalari keychain'e ekle
+        script: keychain add-certificates
       - name: Imzalama profillerini ayarla
         script: xcode-project use-profiles
       - name: IPA derle
