@@ -16,7 +16,7 @@ if errorlevel 1 (
 REM Platform klasorleri yoksa proje henuz olusturulmamis demektir.
 if not exist "android" (
   echo [UYARI] android klasoru yok. Once bu klasorde su komutu calistirin:
-  echo         flutter create --project-name color_match_game --org com.bnovative .
+  echo         flutter create --project-name mind_mix --org com.bnovative .
   echo         flutter pub get
   echo         dart run flutter_launcher_icons
   echo Sonra bu dosyayi tekrar calistirin.
